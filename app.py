@@ -1,40 +1,35 @@
+#まずは、Streamlitをインストールします
 pip install streamlit
-import streamlit as st
-import numpy as np
+
+#次に、最適化問題を設定します。以下は、例として、運賃の最小化問題を設定した例です。
+
 from scipy.optimize import minimize
 
-def objective_function(x):
-    return x[0]*x[3]*(x[0]+x[1]+x[2])+x[2]
+def fare_optimization(x):
+    fare = 2 * x[0] + 3 * x[1] + 4 * x[2]
+    return fare
 
-def constraint_1(x):
-    return x[0]*x[1]*x[2]*x[3]-25.0
+bnds = ((0, None), (0, None), (0, None))
+x0 = [0, 0, 0]
 
-def constraint_2(x):
-    sum_eq = 40.0
-    for i in range(4):
-        sum_eq = sum_eq - x[i]**2
-    return sum_eq
+res = minimize(fare_optimization, x0, bounds=bnds)
+#StreamlitでWebアプリを作る
+#最後に、Streamlitを使ってWebアプリを作成します。
+#以下は、最適化問題を解くための入力フォームを作成し、結果を表示する例です。
 
-st.title("Simple Optimization App")
+import streamlit as st
 
-x0 = [1,5,5,1]
+st.title("Fare Optimization")
 
-b = (1.0,5.0)
-bnds = (b, b, b, b)
+x0 = st.slider("Number of adult tickets", 0, 10, 0)
+x1 = st.slider("Number of children tickets", 0, 10, 0)
+x2 = st.slider("Number of senior tickets", 0, 10, 0)
 
-con1 = {'type':'ineq','fun':constraint_1}
-con2 = {'type':'eq','fun':constraint_2}
-cons = [con1,con2]
+if st.button("Optimize"):
+    res = minimize(fare_optimization, [x0, x1, x2], bounds=bnds)
+    st.success("Minimum fare: ${}".format(res.fun))
+#上記のコードを実行し、Webブラウザでアクセスすることで、運賃の最小化問題を解くWebアプリが使用できます。
 
-solution = minimize(objective_function,x0,method='SLSQP',\
-                   bounds=bnds,constraints=cons)
 
-st.write("Solution")
-st.write("x1 = ",solution.x[0])
-st.write("x2 = ",solution.x[1])
-st.write("x3 = ",solution.x[2])
-st.write("x4 = ",solution.x[3])
 
-st.write("Objective function value")
-st.write(solution.fun)
-streamlit run my_app.py
+
